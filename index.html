@@ -165,7 +165,7 @@
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2020/07/04/%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">类加载器与双亲委派机制（JVM入门学习）</a>
+            <a href="/2020/07/04/%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">类加载器与双亲委派机制（JVM入门学习三）</a>
         </h1>
 
         <div class="post-meta">
@@ -201,22 +201,14 @@
 <li>扩展类加载器</li>
 <li>应用程序（系统类）加载器</li>
 </ol>
-<h2 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h2><p>保证安全，防止修改重写JVM代码。</p>
-<p>APP -&gt; EXC(扩展类加载器) -&gt; BOOT(根加载器)</p>
-<p>Java程序执行的时候先到根加载器，看能不能执行</p>
-<ol>
-<li>类加载器收到类加载的请求 Application</li>
-<li>将这个请求向上委托给父类加载器完成，一直向上委托，直到启动类加载器</li>
-<li>启动类加载器检查是否能够加载当前这个类，能加载就使用当前的加载器，否则抛出异常，通知子加载器进行加载</li>
-<li>重复步骤3</li>
-</ol>
-<p><strong>null的情况</strong></p>
-<p>java调用不到，有可能是用C、C++编写的程序（native 方法调用本地方法）</p>
-<p>Java = C++–：去掉繁琐的东西，指针，内存管理</p>
-<blockquote>
-<p> JNI: Java本地接口</p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/07/04/%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%9C%BA%E5%88%B6/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
