@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-erjian.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-erjian.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-erjian.png">
+  <link rel="mask-icon" href="/images/logo-erjian.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.erjiangao.com","root":"/","scheme":"Mist","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="预备知识本示例以我今年完成的一个实现师生互选的项目（点击访问）为基础，演示Spring Boot + MySQL + Vue的CI&#x2F;CD的完整流程，旨在介绍具体的步骤，不包含很多理论知识，开始之前你最好掌握以下预备知识~  docker基础知识 微服务框架基础知识 持续集成、交付、部署的基本思想  所需工具 docker docker-compose GitHub repository GitHu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务架构持续集成、交付、部署完整流程示例">
+<meta property="og:url" content="http://blog.erjiangao.com/2020/06/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E3%80%81%E4%BA%A4%E4%BB%98%E3%80%81%E9%83%A8%E7%BD%B2%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%E7%A4%BA%E4%BE%8B/index.html">
+<meta property="og:site_name" content="Eric&#39;s Blog">
+<meta property="og:description" content="预备知识本示例以我今年完成的一个实现师生互选的项目（点击访问）为基础，演示Spring Boot + MySQL + Vue的CI&#x2F;CD的完整流程，旨在介绍具体的步骤，不包含很多理论知识，开始之前你最好掌握以下预备知识~  docker基础知识 微服务框架基础知识 持续集成、交付、部署的基本思想  所需工具 docker docker-compose GitHub repository GitHu">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012410.png">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012501.png">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012550.png">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012624.png">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012642.png">
+<meta property="og:image" content="http://picbed.erjiangao.com/img/20200622012749.png">
+<meta property="article:published_time" content="2020-06-21T08:49:43.000Z">
+<meta property="article:modified_time" content="2021-03-23T12:21:59.131Z">
+<meta property="article:author" content="Erjian Gao">
+<meta property="article:tag" content="web开发技术">
+<meta property="article:tag" content="项目">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://picbed.erjiangao.com/img/20200622012410.png">
+
+<link rel="canonical" href="http://blog.erjiangao.com/2020/06/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E3%80%81%E4%BA%A4%E4%BB%98%E3%80%81%E9%83%A8%E7%BD%B2%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%E7%A4%BA%E4%BE%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>微服务架构持续集成、交付、部署完整流程示例 | Eric's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Eric's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/ErjianGao" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://blog.erjiangao.com/2020/06/21/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8C%81%E7%BB%AD%E9%9B%86%E6%88%90%E3%80%81%E4%BA%A4%E4%BB%98%E3%80%81%E9%83%A8%E7%BD%B2%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B%E7%A4%BA%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Erjian Gao">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Eric's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务架构持续集成、交付、部署完整流程示例
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-06-21 16:49:43" itemprop="dateCreated datePublished" datetime="2020-06-21T16:49:43+08:00">2020-06-21</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>本示例以我今年完成的一个<a href="https://github.com/ErjianGao/tutor-selection-tool" target="_blank" rel="noopener">实现师生互选的项目（点击访问）</a>为基础，演示<code>Spring Boot + MySQL + Vue</code>的CI/CD的完整流程，旨在介绍具体的步骤，不包含很多理论知识，开始之前你最好掌握以下预备知识~</p>
+<ul>
+<li><a href="https://docs.docker.com/" target="_blank" rel="noopener">docker基础知识</a></li>
+<li><a href="http://dockone.io/article/3687" target="_blank" rel="noopener">微服务框架基础知识</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2015/09/continuous-integration.html" target="_blank" rel="noopener">持续集成、交付、部署的基本思想</a></li>
+</ul>
+<h2 id="所需工具"><a href="#所需工具" class="headerlink" title="所需工具"></a>所需工具</h2><ul>
+<li>docker</li>
+<li>docker-compose</li>
+<li>GitHub repository</li>
+<li>GitHub actions workflow</li>
+<li>GitHub package</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><h3 id="申请GitHub公共仓库"><a href="#申请GitHub公共仓库" class="headerlink" title="申请GitHub公共仓库"></a>申请GitHub公共仓库</h3><p>这一步比较简单，直接在GitHub网站申请即可，将代码提交到GitHub仓库中，不再赘述。</p>
+<h3 id="持续集成"><a href="#持续集成" class="headerlink" title="持续集成"></a>持续集成</h3><h4 id="定义GitHub-actions-workflow"><a href="#定义GitHub-actions-workflow" class="headerlink" title="定义GitHub actions workflow"></a>定义GitHub actions workflow</h4><p>Github actions是一套工作流，基于脚本执行操作。</p>
+<p>在仓库首页点击Actions</p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012410.png" alt=""></p>
+<p>首先配置后端，由于我们的Spring Boot项目是通过Maven构件的，所以选择Maven模板工作流。</p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012501.png" alt=""></p>
+<p>GitHub会自动生成在项目的<code>.github/workflow</code>生成了一个yaml类型的脚本，通过编写此脚本定义工作流。脚本的部分参数说明如下：</p>
+<p><strong>maven.yml</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This workflow will build a Java project with Maven</span></span><br><span class="line"><span class="comment"># For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 工作流名称</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">Java</span> <span class="string">CI</span> <span class="string">with</span> <span class="string">Maven</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 监听</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="comment"># 当向master分支push操作的时候执行操作</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="comment"># 分支列表</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="comment"># 持续集成</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="comment"># 指定操作系统（自动生成），在ubuntu上执行下列操作</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="comment"># 将步骤暴露出去为actions，类似于发布出去，让别人调用，这是GitHub提供的actions，只要一执行use就会执行一系列操作，此步是将仓库中的源码提取出来，并不需要关心位置</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v2</span></span><br><span class="line">      <span class="comment"># 声明步骤名称</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Set</span> <span class="string">up</span> <span class="string">JDK</span> <span class="number">11</span></span><br><span class="line">        <span class="comment"># 把ubuntu中的jdk版本设为11</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-java@v1</span></span><br><span class="line">        <span class="comment"># 参数赋给上边的use</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">java-version:</span> <span class="number">11</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">with</span> <span class="string">Maven</span></span><br><span class="line">        <span class="comment"># 由GitHub提供的服务器进行构建、打包，单元测试中涉及到数据库的操作，所以单元测试不会通过，应该声明跳过单元测试，或者直接在gitignore中把测试的代码忽略</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">mvn</span> <span class="string">package</span> <span class="string">-DskipTests</span></span><br></pre></td></tr></table></figure>
+
+<p>前端的持续集成与后端基本相同，只需选取node.js的工作流模板进行编写即可。</p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012550.png" alt=""></p>
+<p>前端的<code>workflow</code>定义如下。</p>
+<p><strong>node.js.yml</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Node.js</span> <span class="string">CI</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line">  <span class="attr">pull_request:</span></span><br><span class="line">    <span class="attr">branches:</span> <span class="string">[</span> <span class="string">master</span> <span class="string">]</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v2</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Use</span> <span class="string">Node.js</span> <span class="string">'12.x'</span></span><br><span class="line">      <span class="attr">uses:</span> <span class="string">actions/setup-node@v1</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">node-version:</span> <span class="string">$&#123;&#123;</span> <span class="string">matrix.node-version</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">ci</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">run</span> <span class="string">build</span> <span class="string">--if-present</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">test</span></span><br></pre></td></tr></table></figure>
+
+<p>到此可以完成项目后端的持续集成，每次<code>push</code>或<code>pull request</code>之后GitHub工作流会将代码仓库中的代码提取出来进行测试和打包。</p>
+<h3 id="持续交付"><a href="#持续交付" class="headerlink" title="持续交付"></a>持续交付</h3><p>代码推送后，我们需要系统根据定义好的Docker file文件，构件docker镜像，并推送到某个镜像服务器（这里介绍Github package）中去，在工作流中添加step，登录GitHub镜像服务器，构建镜像，打标签，推送至镜像仓库。</p>
+<h4 id="定义Docker-file"><a href="#定义Docker-file" class="headerlink" title="定义Docker file"></a>定义Docker file</h4><p>Docker file应定义在项目的根目录下，这样在GitHub工作流工作时可以具有连贯性，docker可以直接基于当前位置（项目根目录）进行镜像的构件。</p>
+<p><strong>后端Spring Boot的Docker file</strong></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 声明基础镜像</span></span><br><span class="line"><span class="keyword">FROM</span> openjdk:<span class="number">11</span></span><br><span class="line"><span class="comment"># 打包后在项目目录下，将编译后的jar包复制到容器指定位置</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> ./target/*.jar /home/tutor-selection-tool.jar</span></span><br><span class="line"><span class="comment"># 声明入口，运行容器后，运行java程序，加参数使用生产环境的配置</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> java -jar /home/tutor-selection-tool.jar --spring.profiles.active=prod</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>前端nginx的Docker file</strong></p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于最新版nginx创建</span></span><br><span class="line"><span class="keyword">FROM</span> nginx:latest</span><br><span class="line"><span class="comment"># 将nginx配置放到指定的位置</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> mysite.template /etc/nginx/conf.d/mysite.template</span></span><br><span class="line"><span class="comment"># 打完包后在项目下的dist拷贝到指定位置</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> dist/ /usr/share/nginx/html/</span></span><br><span class="line"><span class="comment"># 通过shell语句完成对nginx配置中变量的识别</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> /bin/bash -c <span class="string">"envsubst &lt; /etc/nginx/conf.d/mysite.template &gt; /etc/nginx/conf.d/default.conf &amp;&amp; exec nginx -g 'daemon off;'"</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="定义项目配置文件"><a href="#定义项目配置文件" class="headerlink" title="定义项目配置文件"></a>定义项目配置文件</h4><p><strong>Spring boot使用生产环境下的配置，配置如下</strong></p>
+<p><strong>application.properties</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开发环境</span></span><br><span class="line"><span class="meta">spring.profiles.active</span>=<span class="string">dev</span></span><br></pre></td></tr></table></figure>
+
+<p>application-prod.properites 中几个与生产环境中不同的配置如下所示，需要注意的是数据源的主机地址和端口号应该是部署的时候确定的，所以应该设置成变量，数据库的用户名和密码同理。</p>
+<p><strong>application-prod.properites</strong></p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">########## datasource ##########</span></span><br><span class="line"><span class="comment"># 如果数据库不存在则创建，生产环境下数据库端口使用变量，springboot自动在系统运行的环境变量中找变量</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:mysql://$&#123;dhost&#125;/tutor_selection_tool?createDatabaseIfNotExist=true\</span></span><br><span class="line">  <span class="meta">&amp;serverTimezone</span>=<span class="string">Asia/Shanghai</span></span><br><span class="line"><span class="comment"># 现在建议使用密钥的方式，不易被破解</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">$&#123;dusername&#125;</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">$&#123;dpassword&#125;</span></span><br><span class="line"><span class="comment"># MySQL8的驱动</span></span><br><span class="line"><span class="meta">spring.datasource.driverClassName</span>=<span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line"></span><br><span class="line"><span class="comment">########## log ##########</span></span><br><span class="line"><span class="meta">logging.level.root</span>=<span class="string">warn</span></span><br><span class="line"><span class="comment"># 生产环境下使用info级</span></span><br><span class="line"><span class="meta">logging.level.com.erjiangao</span>=<span class="string">info</span></span><br><span class="line"><span class="comment"># 时间；日志级别；类；方法；行(行不能使用圆括号)</span></span><br><span class="line"><span class="meta">logging.pattern.console</span>=<span class="string">%d&#123;yyyy-MM-dd HH:mm:ss&#125; %-5level %C.%M[%line] - %msg%n</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>nginx配置</strong></p>
+<p>这里只列举了最基本的nginx配置，详细配置可以参考<a href="https://juejin.im/post/5c1616186fb9a049a42ef21d" target="_blank" rel="noopener">这篇文章</a></p>
+<p><strong>mysite.template</strong></p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="comment"># 设定通过nginx上传文件的大小</span></span><br><span class="line">    <span class="attribute">client_max_body_size</span> <span class="number">0</span>;</span><br><span class="line">    <span class="comment"># 入口文件的设置</span></span><br><span class="line">    <span class="attribute">location</span> / &#123;</span><br><span class="line">        <span class="comment"># 入口文件所在位置</span></span><br><span class="line">        <span class="attribute">root</span> /usr/share/nginx/html;</span><br><span class="line">        <span class="attribute">index</span> <span class="variable">$&#123;index&#125;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment"># 反向代理设置</span></span><br><span class="line">    <span class="attribute">location</span> /api/ &#123;</span><br><span class="line">        <span class="comment"># 完成反向代理，映射到后端</span></span><br><span class="line">        <span class="attribute">proxy_pass</span> http://<span class="variable">$&#123;backend&#125;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="登录docker镜像服务器"><a href="#登录docker镜像服务器" class="headerlink" title="登录docker镜像服务器"></a>登录docker镜像服务器</h4><p>GitHub package用于存储docker镜像，各大公司云服务同样可以实现此镜像管理功能，但是GitHub package是完全免费的。</p>
+<p><strong>创建用于命令行的个人访问令牌</strong></p>
+<p>如果用普通的密码登录，权限会受到限制，GitHub 提供一个令牌，可用于代表 GitHub 操作 进行身份验证。</p>
+<p><a href="https://help.github.com/cn/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line" target="_blank" rel="noopener">https://help.github.com/cn/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line</a></p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012624.png" alt=""></p>
+<p>该令牌一定要妥善保管，不能暴露出去！</p>
+<p>比较安全的做法是将令牌保存在文件中，然后用命令行进行docker login。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Usage:  docker login [OPTIONS] [SERVER]</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> cat ~/TOKEN.txt | docker login https://docker.pkg.github.com -u USERNAME --password-stdin</span></span><br></pre></td></tr></table></figure>
+
+<p>也可以使用命令行通过令牌直接登录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">echo</span> TOKEN | docker login https://docker.pkg.github.com -u USERNAME --password-stdin</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>在项目的secrets中添加信息</strong></p>
+<p>由于GitHub TOKEN不能暴露在仓库里，所以在项目中添加Secrets变量，然后在workflow中使用<code>${screts.DOCKER_LOGIN}</code>这样的格式使用隐藏的变量进行docker登录。</p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012642.png" alt=""></p>
+<h4 id="在yaml中继续添加step，发布到镜像服务器"><a href="#在yaml中继续添加step，发布到镜像服务器" class="headerlink" title="在yaml中继续添加step，发布到镜像服务器"></a>在yaml中继续添加step，发布到镜像服务器</h4><blockquote>
+<p><code>docker build [OPTIONS] PATH | URL | -</code><br>Build an image from a Dockerfile</p>
+<p><code>docker push [OPTIONS] NAME[:TAG]</code><br>Push an image or a repository to a registry</p>
+</blockquote>
+<p><strong>后端工作流maven.yml</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="comment"># 持续集成</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="comment"># 指定操作系统（自动生成），在ubuntu上执行下列操作</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    </span><br><span class="line">      <span class="string">...</span></span><br><span class="line">      </span><br><span class="line">      <span class="comment"># 发布镜像</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">push</span> <span class="string">to</span> <span class="string">package</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">          <span class="comment"># 使用个人令牌或密码进行docker登录</span></span><br><span class="line">          <span class="string">$&#123;&#123;</span> <span class="string">secrets.DOCKER_LOGIN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="comment"># 根据指定的目录内的Dockerfile进行构建，由于是当前目录，所以就是一个点，打标签 服务器/仓库/镜像:版本</span></span><br><span class="line">          <span class="string">docker</span> <span class="string">build</span> <span class="string">.</span> <span class="string">-t</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool/tutor-selection-tool:latest</span></span><br><span class="line">          <span class="comment"># 将镜像推送到镜像服务器</span></span><br><span class="line">          <span class="string">docker</span> <span class="string">push</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool/tutor-selection-tool:latest</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>前端工作流node.js.yml</strong></p>
+<p>与后端写法一样</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    </span><br><span class="line">      <span class="string">...</span></span><br><span class="line">      </span><br><span class="line">      <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line">       <span class="string">$&#123;&#123;</span> <span class="string">secrets.DOCKER_LOGIN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">       <span class="string">docker</span> <span class="string">build</span> <span class="string">-t</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool-vue/tutor-selection-tool-vue:latest</span> <span class="string">.</span></span><br><span class="line">       <span class="string">docker</span> <span class="string">push</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool-vue/tutor-selection-tool-vue:latest</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="持续部署"><a href="#持续部署" class="headerlink" title="持续部署"></a>持续部署</h3><p>工作流程是需要先进入到项目部署服务器，然后从docker镜像服务器拉取镜像，根据提前放到项目根目录下的docker-compose.yml文件运行docker容器。</p>
+<h4 id="编写docker-compose文件"><a href="#编写docker-compose文件" class="headerlink" title="编写docker-compose文件"></a>编写docker-compose文件</h4><p>docker-compose是一个定义并运行docker容器的工具，使用docker compose可以方便的进行容器之间的编排，完成容器间互交，位置一般在部署服务的项目根目录下。详细介绍可以查阅<a href="https://docs.docker.com/compose/" target="_blank" rel="noopener">官方文档</a>。</p>
+<p>本项目一共定义了三个service，其中Spring Boot服务与Nginx服务会从持续部署中的docker镜像服务拉取最新镜像。定义桥接网络可以方便地实现服务间的互交，将三个容器放到同一个网络下即可。</p>
+<p>还有一个值得注意的点是可以通过声明<code>depends_on</code>来定义当前服务依赖于哪个服务，例如本项目中，Sping Boot服务依赖于数据库mysql服务，前端的nginx服务又依赖于Sping Boot服务。</p>
+<p><strong>项目结构</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tutor-selction-tool     </span><br><span class="line">├── docker-compose.yml</span><br><span class="line">├── mysql</span><br><span class="line">│   └── data    </span><br><span class="line">├── nginx</span><br><span class="line">└── openjdk</span><br></pre></td></tr></table></figure>
+
+<p><strong>docker-compose.yml</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定版本</span></span><br><span class="line"><span class="attr">version:</span> <span class="string">'3.7'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="comment"># 数据库服务</span></span><br><span class="line">  <span class="attr">tutor-selection-tool-mysql:</span></span><br><span class="line">    <span class="comment"># 容器命名</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">tutor-selection-tool-mysql</span></span><br><span class="line">    <span class="comment"># 指定mysql官方镜像</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">mysql:8</span></span><br><span class="line">    <span class="comment"># 数据挂载，宿主位置:容器位置，容器中的数据与宿主机的文件夹进行挂载，防止删除容器后数据丢失，或者当使用新的容器，想使用原来的数据时方便恢复，后面的容器的位置是官方定义的</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">./mysql/data/:/var/lib/mysql/</span></span><br><span class="line">    <span class="comment"># 声明网络</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">spring-boot-mysql-nginx-network</span></span><br><span class="line">    <span class="comment"># 环境变量，mysql要求提供，根据此密码可以进入容器mysql中</span></span><br><span class="line">    <span class="attr">environment:</span></span><br><span class="line">      <span class="attr">TZ:</span> <span class="string">Asia/Shanghai</span></span><br><span class="line">      <span class="attr">MYSQL_ROOT_PASSWORD:</span> <span class="string">root</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Springboot服务</span></span><br><span class="line">  <span class="attr">tutor-selection-tool-openjdk:</span></span><br><span class="line">    <span class="comment"># 容器命名</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">tutor-selection-tool-openjdk</span></span><br><span class="line">    <span class="comment"># 从GitHub package拉取镜像</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool/tutor-selection-tool:latest</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">spring-boot-mysql-nginx-network</span></span><br><span class="line">    <span class="comment"># 环境变量</span></span><br><span class="line">    <span class="attr">environment:</span></span><br><span class="line">      <span class="comment"># 从当前的网络中找指定主机端口</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">dhost=tutor-selection-tool-mysql:3306</span></span><br><span class="line">      <span class="comment"># 登录名密码</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">dusername=root</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">dpassword=root</span></span><br><span class="line">    <span class="comment"># 将容器端口映射到宿主机端口，可以声明也可以不声明，一般情况下不会将后端端口直接暴露出去</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">"8080:8080"</span></span><br><span class="line">    <span class="comment"># 声明依赖于那个服务</span></span><br><span class="line">    <span class="attr">depends_on:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">tutor-selection-tool-mysql</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment"># nginx服务</span></span><br><span class="line">  <span class="attr">tutor-selection-tool-nginx:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool-vue/tutor-selection-tool-vue:latest</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">spring-boot-mysql-nginx-network</span></span><br><span class="line">    <span class="attr">environment:</span></span><br><span class="line">      <span class="comment"># 配置前端Nginx反向代理</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">backend=tutor-selection-tool-openjdk:8080</span></span><br><span class="line">      <span class="comment"># 配置入口文件</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">index=index.html</span></span><br><span class="line">    <span class="comment"># 向外暴露80端口</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">"80:80"</span></span><br><span class="line">    <span class="attr">depends_on:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">tutor-selection-tool-openjdk</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建桥接网络，实现容器之间互交</span></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line">  <span class="attr">spring-boot-mysql-nginx-network:</span></span><br><span class="line">    <span class="attr">driver:</span> <span class="string">bridge</span></span><br></pre></td></tr></table></figure>
+
+<p>docker-compose编写完成后需要放到服务器项目根目录下，我是先在本地完成了编写，然后使用xftp工具完成了传输。</p>
+<h4 id="继续编写workflow完成持续部署"><a href="#继续编写workflow完成持续部署" class="headerlink" title="继续编写workflow完成持续部署"></a>继续编写workflow完成持续部署</h4><p>部署部分的工作流使用第三方提供的action，将服务器的用户名密码作为with参数完成登录部署服务器（这里服务器用户名密码当然也需要方法项目的Secrets里面），并使用docker-compose拉取镜像，运行容器，最后删除掉旧的docker镜像。</p>
+<blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Pulls images for services defined in a Compose file, but does not start the containers.</span><br><span class="line">Usage: docker-compose pull [options] [SERVICE...]</span><br><span class="line"></span><br><span class="line">Builds, (re)creates, starts, and attaches to containers for a service.</span><br><span class="line">Usage: docker-compose up [options] [--scale SERVICE&#x3D;NUM...] [SERVICE...]</span><br><span class="line"></span><br><span class="line">Usage:	docker rmi [OPTIONS] IMAGE [IMAGE...]</span><br><span class="line">Remove one or more images</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>maven.yml</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="comment"># 持续集成</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    </span><br><span class="line">    <span class="string">...</span></span><br><span class="line">    </span><br><span class="line">  <span class="comment"># 持续部署</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="comment"># 需要build执行完才能执行部署</span></span><br><span class="line">    <span class="attr">needs:</span> <span class="string">[</span> <span class="string">build</span> <span class="string">]</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">deploy</span></span><br><span class="line">        <span class="comment"># 使用第三方提供的登录actions</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">appleboy/ssh-action@master</span></span><br><span class="line">        <span class="comment"># 登录需要的参数</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">host:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_HOST</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">username:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_USERNAME</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">password:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_PASSWORD</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="comment"># 登录后执行命令</span></span><br><span class="line">          <span class="attr">script:</span> <span class="string">|</span></span><br><span class="line">            <span class="comment"># 进入到项目文件夹中</span></span><br><span class="line">            <span class="string">cd</span> <span class="string">/home/erjiangao/services/tutor-selection-tool</span></span><br><span class="line">            <span class="comment"># 重新基于docker-compose.yml拉取镜像</span></span><br><span class="line">            <span class="string">docker-compose</span> <span class="string">pull</span></span><br><span class="line">            <span class="comment"># 如果文件名不叫docker-compose.yml，则加-f参数，基于指定文件执行后台启动</span></span><br><span class="line">            <span class="string">docker-compose</span> <span class="string">up</span> <span class="string">-d</span></span><br><span class="line">            <span class="comment"># “&amp;&amp;”这种写法的目的是先判断一下当前仓库里有没有标签为&lt;none&gt;的镜像，如果有的话，继续执行镜像删除语句，如果没有的话，则直接跳过跳过删除语句，防止删除</span></span><br><span class="line">            <span class="string">[</span> <span class="string">$(docker</span> <span class="string">images</span> <span class="string">-f</span> <span class="string">dangling=true</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool/tutor-selection-tool</span> <span class="string">-q)</span> <span class="string">]</span> <span class="string">&amp;&amp;</span> <span class="string">\</span></span><br><span class="line">            <span class="comment"># 删除多余镜像</span></span><br><span class="line">            <span class="string">docker</span> <span class="string">rmi</span> <span class="string">$(docker</span> <span class="string">images</span> <span class="string">-f</span> <span class="string">dangling=true</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool/tutor-selection-tool</span> <span class="string">-q)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>node.js.yml</strong></p>
+<p>前端部署脚本与后端基本相同</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line"></span><br><span class="line">    <span class="string">...</span></span><br><span class="line">        </span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">needs:</span> <span class="string">[</span> <span class="string">build</span> <span class="string">]</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">deploy</span></span><br><span class="line">      <span class="attr">uses:</span> <span class="string">appleboy/ssh-action@master</span></span><br><span class="line">      <span class="attr">with:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_HOST</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">username:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_USERNAME</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.SERVER_PASSWORD</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">script:</span> <span class="string">|</span></span><br><span class="line">          <span class="string">$&#123;&#123;</span> <span class="string">secrets.DOCKER_LOGIN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="string">cd</span> <span class="string">/home/erjiangao/services/tutor-selection-tool/</span></span><br><span class="line">          <span class="string">docker-compose</span> <span class="string">up</span> <span class="string">-d</span></span><br><span class="line">          <span class="string">[</span> <span class="string">$(docker</span> <span class="string">images</span> <span class="string">-f</span> <span class="string">dangling=true</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool-vue/tutor-selection-tool-vue</span> <span class="string">-q)</span> <span class="string">]</span> <span class="string">&amp;&amp;</span> <span class="string">\</span></span><br><span class="line">           <span class="string">docker</span> <span class="string">rmi</span> <span class="string">$(docker</span> <span class="string">images</span> <span class="string">-f</span> <span class="string">dangling=true</span> <span class="string">docker.pkg.github.com/erjiangao/tutor-selection-tool-vue/tutor-selection-tool-vue</span> <span class="string">-q)</span></span><br></pre></td></tr></table></figure>
+
+<p>到这里基于GitHub Actions Workflow的持续集成、交付、部署就已经定义好了，接下来每当push或者pull request到代码仓库时就会激活工作流自动完成一个CI/CD的流程。登录服务器查看一下docker容器的状态，如下。</p>
+<p><img src="http://picbed.erjiangao.com/img/20200622012749.png" alt=""></p>
+<p>快去试试吧~</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/web%E5%BC%80%E5%8F%91%E6%8A%80%E6%9C%AF/" rel="tag"><i class="fa fa-tag"></i> web开发技术</a>
+              <a href="/tags/%E9%A1%B9%E7%9B%AE/" rel="tag"><i class="fa fa-tag"></i> 项目</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/29/%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F%E4%B8%8E%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%9A%84%E5%8C%BA%E5%88%AB/" rel="prev" title="归并排序与快速排序的区别">
+      <i class="fa fa-chevron-left"></i> 归并排序与快速排序的区别
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/02/%E8%BD%AF%E4%BB%B6%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" rel="next" title="软件项目管理知识点总结（8 - 17章）">
+      软件项目管理知识点总结（8 - 17章） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#预备知识"><span class="nav-number">1.</span> <span class="nav-text">预备知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#所需工具"><span class="nav-number">2.</span> <span class="nav-text">所需工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流程"><span class="nav-number">3.</span> <span class="nav-text">流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#申请GitHub公共仓库"><span class="nav-number">3.1.</span> <span class="nav-text">申请GitHub公共仓库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持续集成"><span class="nav-number">3.2.</span> <span class="nav-text">持续集成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#定义GitHub-actions-workflow"><span class="nav-number">3.2.1.</span> <span class="nav-text">定义GitHub actions workflow</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持续交付"><span class="nav-number">3.3.</span> <span class="nav-text">持续交付</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#定义Docker-file"><span class="nav-number">3.3.1.</span> <span class="nav-text">定义Docker file</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定义项目配置文件"><span class="nav-number">3.3.2.</span> <span class="nav-text">定义项目配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#登录docker镜像服务器"><span class="nav-number">3.3.3.</span> <span class="nav-text">登录docker镜像服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在yaml中继续添加step，发布到镜像服务器"><span class="nav-number">3.3.4.</span> <span class="nav-text">在yaml中继续添加step，发布到镜像服务器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持续部署"><span class="nav-number">3.4.</span> <span class="nav-text">持续部署</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#编写docker-compose文件"><span class="nav-number">3.4.1.</span> <span class="nav-text">编写docker-compose文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#继续编写workflow完成持续部署"><span class="nav-number">3.4.2.</span> <span class="nav-text">继续编写workflow完成持续部署</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Erjian Gao"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Erjian Gao</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ErjianGao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ErjianGao" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:754095810@qq.com" title="E-Mail → mailto:754095810@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Erjian Gao</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
