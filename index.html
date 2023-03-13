@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Erjian Gao's personal website. ">
+    <meta name="keywords" content="Erjian Gao, blog, resume, contact">
+    <meta name="author" content="Erjian Gao">
     <title>My Personal Website</title>
     <link rel="stylesheet" href="stylesheet.css">
     <link href="https://fonts.googleapis.com/css?family=JetBrains+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
-<header>
+<header class="container">
     <h1>Welcome to My Website</h1>
 </header>
-<nav>
+<nav class="container">
     <ul>
         <li><a href="#about">About Me</a></li>
         <li><a href="#resume">My Resume</a></li>
-        <li><a href="https://blog.erjiangao.com">Blog</a></li>
+        <li><a target="_blank" href="https://blog.erjiangao.com">Blog</a></li>
         <li><a href="#contact">Contact Me</a></li>
     </ul>
 </nav>
 <main>
-    <section id="about">
+    <div id="about" class="container">
         <h2>About Me</h2>
         <p>Hi, I'm Erjian Gao! I'm Erjian Gao, a first-year master student in Software Engineering & System track of
             Electrical and Computer Engineering at University of Texas at Austin. I'm very interested in software
             development, and have several full-stack projects based on Java, Python, Javascript, and popular Web
             Frameworks. </p>
-    </section>
-    <section id="resume">
+    </div>
+    <div id="pic" class="container">
+        <div id="intro">
+            <h1>Erjian Gao</h1>
+            <p>I AM A DEVELOPER</p>
+        </div>
+        <div>
+            <img src="public/erjian.jpeg" alt="Erjian Gao's picture">
+        </div>
+    </div>
+    <div id="resume" class="container">
         <h2>My Resume</h2>
         <h3>Education</h3>
         <ul>
@@ -36,13 +49,13 @@
             <li>Incoming Software Development Intern (Present - May 2023)</li>
             <li></li>
         </ul>
-    </section>
-    <section id="contact">
+    </div>
+    <div id="contact" class="container">
         <h2>Contact Me</h2>
         <p>You can reach me at imericgao@gmail.com</p>
-    </section>
+    </div>
 </main>
-<footer>
+<footer class="container">
     <p>&copy; 2023 Erjian Gao</p>
 </footer>
 </body>
