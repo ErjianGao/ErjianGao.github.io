@@ -1,0 +1,87 @@
+* {
+    box-sizing: inherit;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fbfdef;
+    font-family: "Inter",sans-serif;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+    max-width: 70%;
+    margin: auto;
+}
+
+header {
+    border: 2px solid black;
+    padding: 20px;
+
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 20px;
+}
+
+#resume {
+    border: 2px solid black;
+    padding: 20px;
+
+}
+
+#about {
+    border: 2px solid black;
+    padding: 20px;
+
+}
+
+#contact {
+    border: 2px solid black;
+    padding: 20px;
+
+}
+
+footer {
+    border: 2px solid black;
+    padding: 20px;
+}
+
+nav {
+    border: 2px solid black;
+    padding: 20px;
+    background-color: #d7f5ef;
+}
+
+nav:hover {
+    background-color: #25534a;
+}
+
+nav:hover ul li a {
+    color: white;
+}
+
+nav ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+nav a {
+    text-decoration: none;
+    color: black;
+}
+
+li {
+    list-style: none;
+}
+
+h1, h2, h3 {
+    font-family: "JetBrains Mono", monospace;
+}
